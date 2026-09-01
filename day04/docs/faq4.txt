@@ -1,0 +1,7 @@
+ACC Bank - Fixed Deposit (FD) Interest Rates
+
+ACC Bank offers Fixed Deposit interest rates ranging from 6.5% to 7.25% per annum, depending 
+on the tenure. For tenures of 1 year, the rate is 6.75%. For tenures of 2-3 years, the rate is 
+7.0%. For tenures of 5 years or more, the rate is 7.25%. Senior citizens receive an additional 
+0.5% interest on all tenures. Premature withdrawal is allowed but incurs a penalty of 1% on 
+the applicable interest rate.
