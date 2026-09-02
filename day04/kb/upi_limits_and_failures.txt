@@ -1,0 +1,8 @@
+ACC Bank UPI Transaction Limits and Failures
+
+The daily UPI transaction limit is Rs. 1,00,000 across all linked UPI apps. 
+New UPI registrations have a lower per-transaction limit of Rs. 25,000 for 
+the first 24 hours. If a UPI transaction fails but the amount is deducted 
+from the account, the amount is automatically reversed within 48 hours as 
+per RBI guidelines. If the refund does not appear after 48 hours, customers 
+should contact upi.support@accbank.com with the transaction reference number.

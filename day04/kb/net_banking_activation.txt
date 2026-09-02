@@ -1,0 +1,9 @@
+ACC Bank Net Banking Activation
+
+Net banking can be activated in two ways: through the mobile app under 
+Settings > Net Banking > Activate, or by visiting a branch with a filled 
+activation form and ID proof. Online activation requires the registered 
+mobile number and debit card details for verification. Once activated, 
+customers can view statements, transfer funds via NEFT/RTGS/IMPS, and pay 
+bills. If net banking is not used for 12 consecutive months, it is 
+automatically deactivated for security and must be reactivated manually.
