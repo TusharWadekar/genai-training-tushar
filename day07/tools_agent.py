@@ -1,14 +1,13 @@
 import json
 import os
 from langchain_core.tools import tool
-from google import genai
-from google.genai import types
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langgraph.prebuilt import create_react_agent
 from dotenv import load_dotenv
 
 load_dotenv()
 
 MOCK_DATA_PATH = os.path.join(os.path.dirname(__file__), "mock_data.json")
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 
 def load_data():
@@ -43,53 +42,57 @@ def hotlist_card(card_last4: str, reason: str) -> str:
     return f"Card **{card_last4} hotlisted successfully. Reason: {reason}. Ref: {ref_number}"
 
 
-TOOLS_SYSTEM_PROMPT = """You are a banking assistant with access to two tools:
-1. get_balance(account_id) - use when customer asks about their balance
-2. hotlist_card(card_last4, reason) - use when customer wants to block a lost/stolen card
+# ---- Manual tool test (sanity check before wiring up the agent) ----
+def manual_tool_test():
+    print("=== Manual Tool Tests ===")
+    print(get_balance.invoke({"account_id": "ACC1001"}))
+    print(get_balance.invoke({"account_id": "ACC9999"}))
+    print(hotlist_card.invoke({"card_last4": "4412", "reason": "lost"}))
+    print(hotlist_card.invoke({"card_last4": "0000", "reason": "stolen"}))
+    print()
 
-When you need to use a tool, respond ONLY with JSON in this format:
-{"tool": "<tool_name>", "args": {...}}
 
-If no tool is needed, respond normally with a plain text answer."""
+# ---- LangGraph prebuilt ReAct agent ----
+llm = ChatGoogleGenerativeAI(
+    model="gemini-3.6-flash",
+    google_api_key=os.getenv("GEMINI_API_KEY")
+)
+
+SYSTEM_PROMPT = """You are a banking assistant. Use the available tools when needed
+to answer account balance or card-blocking questions. Never invent balances or
+reference numbers — only report what the tools actually return. If a tool returns
+an error, report that error honestly to the customer."""
+
+agent = create_react_agent(llm, [get_balance, hotlist_card], prompt=SYSTEM_PROMPT)
 
 
-def run_agent(user_message: str):
-    resp = client.models.generate_content(
-        model="gemini-3.6-flash",
-        contents=user_message,
-        config=types.GenerateContentConfig(
-            system_instruction=TOOLS_SYSTEM_PROMPT,
-            response_mime_type="application/json"
-        )
-    )
-
-    try:
-        decision = json.loads(resp.text)
-        tool_name = decision.get("tool")
-        args = decision.get("args", {})
-
-        if tool_name == "get_balance":
-            result = get_balance.invoke(args)
-        elif tool_name == "hotlist_card":
-            result = hotlist_card.invoke(args)
-        else:
-            result = "I'm not sure how to help with that."
-
-        print(f"User: {user_message}")
-        print(f"Agent decided to call: {tool_name}({args})")
-        print(f"Tool result: {result}")
-        print("---")
-
-    except (json.JSONDecodeError, TypeError):
-        print(f"User: {user_message}")
-        print(f"Agent response: {resp.text}")
-        print("---")
+def run_conversation(message: str):
+    result = agent.invoke({"messages": [{"role": "user", "content": message}]})
+    print(f"User: {message}")
+    for msg in result["messages"]:
+        role = getattr(msg, "type", "unknown")
+        content = getattr(msg, "content", "")
+        tool_calls = getattr(msg, "tool_calls", None)
+        if tool_calls:
+            print(f"  [{role}] tool_calls: {tool_calls}")
+        elif content:
+            print(f"  [{role}] {content}")
+    print("---")
+    return result
 
 
 if __name__ == "__main__":
-    test_messages = [
-        "What's the balance on account ACC1002?",
-        "I lost my card ending in 4412, please block it",
+    # Step 1: sanity-check the tools directly
+    manual_tool_test()
+
+    # Step 2: run the 4 required conversations one at a time
+    # (comment/uncomment as needed to manage API quota)
+    conversations = [
+        "What's the balance of ACC1001?",
+         "Block my card ending 4412, I lost it.",
+         "I lost my card ending 4412 — block it and then tell me my remaining balance in ACC1001.",
+         "What's the balance of ACC9999?",
     ]
-    for msg in test_messages:
-        run_agent(msg)  
+
+    for conv in conversations:
+        run_conversation(conv)
