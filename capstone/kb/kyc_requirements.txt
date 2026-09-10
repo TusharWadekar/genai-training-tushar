@@ -1,0 +1,8 @@
+ACC Bank KYC (Know Your Customer) Requirements
+
+To complete KYC for any ACC Bank account or service, customers must submit: 
+Aadhaar Card, PAN Card, one recent passport-size photograph, and address proof 
+if different from the Aadhaar-registered address. KYC can be completed online 
+via video KYC through the mobile app, or in person at a branch. Video KYC takes 
+approximately 10 minutes. KYC must be re-verified every 10 years for low-risk 
+accounts and every 2 years for high-risk accounts as per RBI norms.

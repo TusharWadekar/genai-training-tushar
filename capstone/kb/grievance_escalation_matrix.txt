@@ -1,0 +1,9 @@
+ACC Bank Grievance Escalation Matrix
+
+Customer complaints follow a three-level escalation process. Level 1: Branch 
+Manager, response within 3 working days. Level 2: Regional Grievance Officer, 
+response within 7 working days if Level 1 is unresolved or unsatisfactory. 
+Level 3: Nodal Officer (nodalofficer@accbank.com), response within 10 working 
+days. If unresolved after Level 3, customers may approach the Banking 
+Ombudsman as per RBI guidelines. All complaints receive a reference number 
+via SMS within 24 hours of registration.

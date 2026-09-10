@@ -8,7 +8,7 @@ load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 ALLOWED = ["balance_enquiry", "card_hotlist", "statement_request",
-           "upi_issue", "small_talk", "out_of_scope"]
+           "upi_issue", "small_talk", "out_of_scope", "product_info"]       
 
 SYSTEM = """You are an intent classifier for a bank's customer-service bot.
 Respond ONLY with valid JSON, no other text:
@@ -16,7 +16,9 @@ Respond ONLY with valid JSON, no other text:
  "entities": {"card_last4": "...", "account_ref": "...", "period": "..."},
  "confidence": <number between 0 and 1>}
 Allowed intents: balance_enquiry, card_hotlist, statement_request,
-upi_issue, small_talk, out_of_scope.
+upi_issue, small_talk, out_of_scope, product_info.
+product_info is for general questions about bank products, accounts, fees, 
+or policies (e.g., "what savings accounts do you offer", "what are your FD rates").
 Anything about investments, other customers, or unrelated topics is out_of_scope.
 Include only the entities actually present in the message."""
 
