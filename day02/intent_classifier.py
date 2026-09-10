@@ -1,5 +1,6 @@
 import json
 import os
+import time
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
@@ -24,15 +25,24 @@ Include only the entities actually present in the message."""
 
 
 def classify(utterance: str) -> dict:
-    resp = client.models.generate_content(
-        model="gemini-3.6-flash",
-        contents=utterance,
-        config=types.GenerateContentConfig(
-            system_instruction=SYSTEM,
-            response_mime_type="application/json"
-        )
-    )
-    raw = resp.text
+    raw = None
+    for attempt in range(3):
+        try:
+            resp = client.models.generate_content(
+                model="gemini-3.6-flash",
+                contents=utterance,
+                config=types.GenerateContentConfig(
+                    system_instruction=SYSTEM,
+                    response_mime_type="application/json"
+                )
+            )
+            raw = resp.text
+            break
+        except Exception as e:
+            if attempt < 2:
+                time.sleep(10 * (attempt + 1))
+            else:
+                return {"intent": "out_of_scope", "entities": {}, "confidence": 0.0}
 
     # TODO 1: json.loads inside try/except; on failure, retry ONCE, then
     #         return {"intent": "out_of_scope", "entities": {}, "confidence": 0.0}
