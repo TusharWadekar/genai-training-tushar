@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+from pii_utils import mask_pii
 
 sys.path.insert(0, os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "tools"))
@@ -159,19 +160,16 @@ def chat(user_input: str, messages: List[dict]) -> tuple:
     result = app.invoke(state)
     messages.append({"role": "user", "content": user_input})
     messages.append({"role": "assistant", "content": result["response"]})
+        # Log this turn with PII masked, for audit purposes
+    log_entry = f"USER: {mask_pii(user_input)}\nBOT: {mask_pii(result['response'])}\n---\n"
+    log_path = os.path.join(os.path.dirname(__file__), "..", "logs", "conversation.log")
+    os.makedirs(os.path.dirname(log_path), exist_ok=True)
+    with open(log_path, "a", encoding="utf-8") as f:
+        f.write(log_entry)
     return result["response"], messages
 
 
 if __name__ == "__main__":
     messages = []
-    turns = [
-        "My account is ACC1001",
-        "What savings accounts do you offer?",
-        "And what's my balance?",
-    ]
-    for turn in turns:
-        response, messages = chat(turn, messages)
-        print(f"User: {turn}")
-        print(f"Bot: {response}")
-        print(f"Intent: {messages}")
-        print("---")
+    response, messages = chat("My account is ACC1001 and my Aadhaar is 1234 5678 9012", messages)
+    print(response)
