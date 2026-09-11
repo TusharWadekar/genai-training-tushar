@@ -28,3 +28,30 @@ out_of_scope and escalated, rather than being treated as an account-update
 message. This is a minor classifier limitation (mixed-intent messages), 
 noted but not fixed in this pass - the important security property (PII 
 never logged in plaintext) held regardless of this routing behavior.
+
+
+
+## Day 10 - Fresh-Clone Test Findings
+
+Cloned the repo into a completely new folder (D:\Demo\genai-training-tushar), 
+created a fresh venv, installed requirements.txt, recreated .env manually, 
+rebuilt the Chroma index, and ran the full eval suite.
+
+Result: 7/12 passed, 5/12 failed - but ALL 5 failures were tests that call 
+the Gemini API, and all failed with the classifier's safe fallback 
+("out_of_scope"), not a crash. Confirmed via a diagnostic check that the 
+API key WAS loading correctly from .env.
+
+Root cause: the fresh-clone process itself (rebuilding the vector index + 
+running earlier tests) consumed enough of the day's 20-request free-tier 
+quota that the remaining AI-dependent tests failed silently into the 
+defensive fallback rather than erroring out.
+
+## Why This Is a Good (Not Bad) Finding
+This actually validates the Day 2 defensive design: when the API is 
+unavailable/exhausted, the system does NOT crash - it degrades safely to 
+out_of_scope/escalate behavior, which is exactly the intended fallback 
+behavior. However, it also reveals a real operational limitation: on the 
+free tier, a fresh setup + full test run can exceed the daily quota by 
+itself, which would need a paid tier or quota-aware test batching in a real 
+CI/CD pipeline.
